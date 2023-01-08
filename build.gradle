@@ -1,0 +1,30 @@
+plugins {
+    id 'maven-publish'
+    id 'com.chillycheesy.modulo-application' version '1.2.1'
+}
+
+apply from: 'variable.gradle'
+apply from: 'publish.gradle'
+
+group 'com.chillycheesy'
+version project_version
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation "org.junit.jupiter:junit-jupiter-api:$junit_version"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junit_version"
+}
+
+test {
+    useJUnitPlatform()
+}
+
+module {
+    moduleName = 'SshModule'
+    version = '0.0.0'
+    authors = ['ChillyCheesy']
+    main = 'com.your.module.MainClass'
+}

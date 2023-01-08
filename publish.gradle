@@ -1,0 +1,39 @@
+final deployPropertiesFile = rootProject.file('deploy.properties')
+final deployProperty = new Properties()
+if (deployPropertiesFile.exists()) {
+    deployProperty.load(new FileInputStream(deployPropertiesFile))
+    println 'deploy.properties find.'
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            pom {
+                name = project.name.toLowerCase()
+                description = 'It is a Module for Modulo. It facilitates the management of communications by a Ssh protocol.'
+                url = 'https://modulo.chillycheesy.com'
+                licenses {
+                    license {
+                        name = 'Mozilla Public License, Version 2.0'
+                        url = 'https://www.mozilla.org/en-US/MPL/2.0/'
+                    }
+                }
+                scm {
+                    connection = 'scm:git:https://github.com/ChillyCheesy/SshModule.git'
+                    developerConnection = 'scm:git@github.com:ChillyCheesy/SshModule.git'
+                    url = 'https://github.com/ChillyCheesy/SshModule/tree/master'
+                }
+                repositories {
+                    maven {
+                        url deployProperty.url ?: ''
+                        credentials {
+                            username deployProperty.repoUser ?: ''
+                            password deployProperty.repoPassword ?: ''
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
