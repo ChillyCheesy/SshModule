@@ -39,8 +39,8 @@ jobs:
       - name: 🥸 Update version for snapshot
         if: github.ref == 'refs/heads/dev'
         run: |
-          version_line=$(cat gradle.properties | grep modulo_version)
-          sed -i -e "s/$version_line/$version_line-SNAPSHOT/g" gradle.properties
+          version_line=$(cat variables.gradle | grep project_version | cut -d '=' -f 2 | sed 's/ //g' | sed s/\'//g)
+          sed -i -e "s/$version_line/$version_line-SNAPSHOT/g" variables.gradle
       - name: 🐭 Deploy maven-central
         run: |
           chmod +x gradlew
@@ -76,4 +76,4 @@ jobs:
         uses: JamesIves/github-pages-deploy-action@v4.3.3
         with:
           branch: gh-pages
-          folder: modulo-api/build/docs/javadoc
+          folder: build/docs/javadoc
