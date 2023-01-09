@@ -1,0 +1,5 @@
+sshConfig:
+  host: '146.59.226.53'
+  port: '22'
+  user: 'chillycheesy'
+  password: 'Handy123'

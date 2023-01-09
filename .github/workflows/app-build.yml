@@ -1,0 +1,79 @@
+name: App build 🌶
+
+on:
+  push:
+    branches:
+      - master
+      - dev
+
+jobs:
+  build_app:
+    name: 🪶 Build app and deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-java@v2
+        with:
+          distribution: 'zulu'
+          java-version: '16'
+      - name: Setup properties SNAPSHOT
+        if: github.ref == 'refs/heads/dev'
+        run: |
+          echo "repoPassword=$SONATYPE_PASSWORD" > deploy.properties
+          echo "repoUser=$SONATYPE_USER" >> deploy.properties
+          echo "url=$URL_SONATYPE_SNAPSHOT" >> deploy.properties
+        env:
+          SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
+          SONATYPE_USER: ${{ secrets.SONATYPE_USER }}
+          URL_SONATYPE_SNAPSHOT: ${{ secrets.URL_SONATYPE_SNAPSHOT }}
+      - name: Setup properties RELEASE
+        if: github.ref == 'refs/heads/master'
+        run: |
+          echo "repoPassword=$SONATYPE_PASSWORD" > deploy.properties
+          echo "repoUser=$SONATYPE_USER" >> deploy.properties
+          echo "url=$URL_SONATYPE_RELEASE" >> deploy.properties
+        env:
+          SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
+          SONATYPE_USER: ${{ secrets.SONATYPE_USER }}
+          URL_SONATYPE_RELEASE: ${{ secrets.URL_SONATYPE_RELEASE }}
+      - name: 🥸 Update version for snapshot
+        if: github.ref == 'refs/heads/dev'
+        run: |
+          version_line=$(cat gradle.properties | grep modulo_version)
+          sed -i -e "s/$version_line/$version_line-SNAPSHOT/g" gradle.properties
+      - name: 🐭 Deploy maven-central
+        run: |
+          chmod +x gradlew
+          ./gradlew clean publish
+      - name: Setup release title
+        if: github.ref == 'refs/heads/master'
+        run: echo "TITLE=$(cat variables.gradle | grep project_version | cut -d '=' -f 2 | sed 's/ //g' | sed s/\'//g)" >> $GITHUB_ENV
+      - name: Create release
+        if: github.ref == 'refs/heads/master'
+        uses: marvinpinto/action-automatic-releases@v1.2.1
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          automatic_release_tag: ${{ env.TITLE }}
+          title: 📦 ${{ env.TITLE }}
+          prerelease: false
+          files: |
+            build/libs/*.jar
+  deploy_javadoc:
+    if: github.ref == 'refs/heads/dev'
+    name: 📄 Deploy javadoc
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-java@v2
+        with:
+          distribution: 'zulu'
+          java-version: '16'
+      - name: Build javadoc
+        run: |
+          chmod +x gradlew
+          ./gradlew clean javadoc
+      - name: 🚀 Deploy Javadoc
+        uses: JamesIves/github-pages-deploy-action@v4.3.3
+        with:
+          branch: gh-pages
+          folder: modulo-api/build/docs/javadoc

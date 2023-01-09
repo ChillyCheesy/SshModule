@@ -3,11 +3,17 @@ plugins {
     id 'com.chillycheesy.modulo-application' version '1.2.1'
 }
 
-apply from: 'variable.gradle'
+apply from: 'variables.gradle'
 apply from: 'publish.gradle'
 
 group 'com.chillycheesy'
 version project_version
+
+module {
+    moduleName = 'SshModule'
+    authors = ['ChillyCheesy']
+    main = 'com.chillycheesy.sshmodule.SshModule'
+}
 
 repositories {
     mavenCentral()
@@ -16,15 +22,23 @@ repositories {
 dependencies {
     testImplementation "org.junit.jupiter:junit-jupiter-api:$junit_version"
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junit_version"
+    implementation "com.chillycheesy:modulo-api:$modulo_version"
+    implementation "org.apache.sshd:apache-sshd:2.9.2"
+}
+
+jar {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from (configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it)}) {
+        exclude 'META-INF/MANIFEST.MF'
+        exclude 'META-INF/*.SF'
+        exclude 'META-INF/*.DSA'
+        exclude 'META-INF/*.RSA'
+    }
 }
 
 test {
     useJUnitPlatform()
 }
 
-module {
-    moduleName = 'SshModule'
-    version = '0.0.0'
-    authors = ['ChillyCheesy']
-    main = 'com.your.module.MainClass'
-}
+
+

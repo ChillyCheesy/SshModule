@@ -1,5 +1,5 @@
 ext {
-    project_version = '0-1'
+    project_version = '0.1'
     modulo_version = 'BINKS-0.3.0'
     junit_version = '5.8.1'
 }
