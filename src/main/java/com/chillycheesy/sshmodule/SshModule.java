@@ -27,7 +27,7 @@ public class SshModule extends Module {
         this.sshConfig = configEvent.getConfig();
         this.EVENT_MANAGER.emitEvent(this, configEvent);
 
-        this.PAGE_MANAGER.buildAndRegisterPage(this, new Console(), new SshController());
+        this.PAGE_MANAGER.buildAndRegisterPage(this, new Console(), new SshController(this.sshConfig));
     }
 
     @Override
